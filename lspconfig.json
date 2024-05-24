@@ -1,0 +1,8 @@
+{
+	"components": [
+		{
+			"name": "codeEditor",
+			"path": "src/components/codeEditor"
+		}
+	]
+}
