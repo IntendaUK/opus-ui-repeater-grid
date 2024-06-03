@@ -17,7 +17,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 //Test Data
 const columns = 1000;
-const rows = 1000;
+const rows = 10;
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const getRandomString = length => {
