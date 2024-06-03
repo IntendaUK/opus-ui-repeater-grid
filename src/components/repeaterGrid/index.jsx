@@ -1,114 +1,139 @@
-import { useState, useRef } from 'react';
+/* eslint-disable react/prop-types */
 
+//React
+import { useRef, useEffect, useCallback, useMemo } from 'react';
+
+//Opus UI
+import { createContext, Component } from '@intenda/opus-ui';
+
+//Plugins
 import { Grid, AutoSizer, ScrollSync } from 'react-virtualized';
 
-import { ResizableBox } from 'react-resizable';
+//Internal
+import { HeaderColumns } from './header';
+import { calculateColumnWidths } from './events';
 
-import 'react-resizable/css/styles.css';
-import 'react-virtualized/styles.css';
+//Styles
 import './styles.css';
 
-import { Component } from '@intenda/opus-ui';
+//Context
+const RepeaterGridContext = createContext('repeaterGrid');
 
-import data from './data.json';
+//Events
+const onGetData = ({ setState, state: { data, pxPerCharacter, extraColumnWidth } }) => {
+	if (!data || data.length === 0)
+		return;
 
-const list = data.map(d => Object.values(d));
+	const formattedData = data.map(d => Object.values(d));
+	const columnWidths = calculateColumnWidths(formattedData, Object.keys(data[0]), pxPerCharacter, extraColumnWidth);
 
-// Calculate the maximum width of each column
-const calculateColumnWidths = (list) => {
-	const maxColumnWidths = Array(list[0].length).fill(0);
-
-	list.forEach(row => {
-		row.forEach((cell, columnIndex) => {
-			const cellWidth = Math.max(cell.toString().length, Object.keys(list[0])[columnIndex].length, 10) * 10; // Estimate width based on character length
-			if (cellWidth > maxColumnWidths[columnIndex]) {
-				maxColumnWidths[columnIndex] = cellWidth;
-			}
-		});
+	setState({
+		formattedData,
+		columnWidths
 	});
-
-	return maxColumnWidths;
 };
 
-const initialColumnWidths = calculateColumnWidths(list);
-
-const cellRenderer = ({ columnIndex, key, rowIndex, style }) => (
+//Components
+const cellRendererOpus = (formattedData, traitBodyCell, { columnIndex, key, rowIndex, style }) => (
 	<div
 		key={key}
-		style={{
-			...style,
-			display: 'flex',
-			alignItems: 'center',
-			justifyContent: 'center',
-			border: '1px solid #ddd',
-			backgroundColor: rowIndex % 2 === 0 ? '#fff' : '#f7f7f7',
-		}}
+		style={style}
 	>
 		<Component mda={{
-			type: 'input',
-			prps: {
-				value: list[rowIndex][columnIndex] + ''
-			}
+			traits: [{
+				trait: traitBodyCell,
+				traitPrps: {
+					value: formattedData[rowIndex][columnIndex] + ''
+				}
+			}]
 		}} />
 	</div>
 );
 
-export const RepeaterGrid = () => {
-	const [columnWidths, setColumnWidths] = useState(initialColumnWidths);
+const cellRendererHtml = (formattedData, styleCell, { columnIndex, key, rowIndex, style }) => (
+	<div
+		key={key}
+		style={{
+			...styleCell,
+			...style
+		}}
+	>
+		{(formattedData[rowIndex][columnIndex] ?? '') + ''}
+	</div>
+);
+
+//Export
+export const RepeaterGrid = props => {
+	const { id, getHandler, setState, state } = props;
+
+	const { data, formattedData, columnWidths, traitHeaderCell, traitBodyCell } = state;
+	const { heightCellHeader, heightCell, styleCell, styleCellHeader } = state;
+
 	const gridRef = useRef(null);
 	const headerRef = useRef(null);
 
-	const handleResize = (index, { size: { width } }) => {
+	/* eslint-disable-next-line react-hooks/exhaustive-deps */
+	useEffect(getHandler(onGetData), [data]);
+
+	const onResize = useCallback((index, { size: { width } }) => {
 		const newColumnWidths = [...columnWidths];
 		newColumnWidths[index] = width;
-		setColumnWidths(newColumnWidths);
+
+		setState({ columnWidths: newColumnWidths });
 
 		gridRef.current.recomputeGridSize();
-	};
+	/* eslint-disable-next-line react-hooks/exhaustive-deps */
+	}, [columnWidths]);
+
+	const headerColumns = useMemo(() => {
+		return <HeaderColumns onResize={onResize} />;
+	/* eslint-disable-next-line react-hooks/exhaustive-deps */
+	}, [heightCellHeader, styleCellHeader, traitHeaderCell, columnWidths]);
+
+	const memoizedCellRenderer = useCallback(args => {
+		if (traitBodyCell)
+			return cellRendererOpus(formattedData, traitBodyCell, args);
+
+		return cellRendererHtml(formattedData, styleCell, args);
+	}, [traitBodyCell, formattedData, styleCell]);
+
+	const getColumnWidth = useCallback(({ index }) => columnWidths[index], [columnWidths]);
+
+	if (!formattedData)
+		return null;
 
 	return (
-		<ScrollSync>
-			{({ onScroll, scrollLeft }) => (
-				<AutoSizer>
-					{({ width, height }) => (
-						<div style={{ display: 'flex', flexDirection: 'column', flex: '1 1 auto', width }}>
-							<div ref={headerRef} style={{ display: 'flex', flexDirection: 'row', width, overflow: 'hidden' }}>
-								{columnWidths.map((width, index) => (
-									<ResizableBox
-										key={Object.keys(data[0])[index]}
-										width={columnWidths[index]}
-										height={30}
-										axis='x'
-										onResizeStop={(e, data) => handleResize(index, data)}
-										resizeHandles={['e']}
-										minConstraints={[30, 30]}
-										style={{ flexShrink: 0}}
-									>
-										<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#ddd' }}>
-											{Object.keys(data[0])[index]}
-										</div>
-									</ResizableBox>
-								))}
-							</div>
-							<Grid
-								ref={gridRef}
-								cellRenderer={cellRenderer}
-								columnCount={columnWidths.length}
-								columnWidth={({ index }) => columnWidths[index]}
-								height={height - 30}
-								rowCount={list.length}
-								rowHeight={30}
-								width={width}
-								onScroll={({ scrollLeft }) => {
-                                    onScroll({ scrollLeft });
-                                    headerRef.current.scrollLeft = scrollLeft
-                                }}
-								scrollLeft={scrollLeft}
-							/>
-						</div>
+		<RepeaterGridContext.Provider value={props}>
+			<div id={id} className='cpnRepeaterGrid'>
+				<ScrollSync>
+					{({ onScroll, scrollLeft }) => (
+						<AutoSizer>
+							{({ width, height }) => (
+								<div style={{ width }}>
+									<div ref={headerRef} style={{ width }}>
+										{headerColumns}
+									</div>
+									<Grid
+										ref={gridRef}
+										cellRenderer={memoizedCellRenderer}
+										columnCount={columnWidths.length}
+										columnWidth={getColumnWidth}
+										height={height - heightCellHeader}
+										rowCount={formattedData.length}
+										rowHeight={heightCell}
+										width={width}
+										onScroll={({ scrollLeft: newScrollLeft }) => {
+											onScroll({ scrollLeft: newScrollLeft });
+											headerRef.current.scrollLeft = newScrollLeft
+										}}
+										scrollLeft={scrollLeft}
+									/>
+								</div>
+							)}
+						</AutoSizer>
 					)}
-				</AutoSizer>
-			)}
-		</ScrollSync>
+				</ScrollSync>
+			</div>
+		</RepeaterGridContext.Provider>
 	);
 };
