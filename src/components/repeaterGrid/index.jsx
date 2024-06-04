@@ -20,12 +20,14 @@ import './styles.css';
 const RepeaterGridContext = createContext('repeaterGrid');
 
 //Events
-const onGetData = ({ setState, state: { data, pxPerCharacter, extraColumnWidth } }) => {
+const onGetData = ({ setState, state }) => {
+	const { data } = state;
+
 	if (!data || data.length === 0)
 		return;
 
 	const formattedData = data.map(d => Object.values(d));
-	const columnWidths = calculateColumnWidths(formattedData, Object.keys(data[0]), pxPerCharacter, extraColumnWidth);
+	const columnWidths = calculateColumnWidths(formattedData, Object.keys(data[0]), state);
 	const averageColumnSize = columnWidths.reduce((a, b) => a + b, 0) / columnWidths.length;
 
 	setState({
@@ -45,7 +47,7 @@ const cellRendererOpus = (formattedData, traitBodyCell, { columnIndex, key, rowI
 			traits: [{
 				trait: traitBodyCell,
 				traitPrps: {
-					value: formattedData[rowIndex][columnIndex] + ''
+					value: formattedData[rowIndex][columnIndex]
 				}
 			}]
 		}} />

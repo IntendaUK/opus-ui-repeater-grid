@@ -1,4 +1,4 @@
-export const calculateColumnWidths = (formattedData, headings, pxPerCharacter, extraColumnWidth) => {
+export const calculateColumnWidths = (formattedData, headings, { pxPerCharacter, extraColumnWidth, maxAutoColumnSize }) => {
 	const res = Array(formattedData[0].length)
 		.fill(0)
 		.map((_, i) => Math.max(10, headings[i]?.length ?? 0));
@@ -13,7 +13,7 @@ export const calculateColumnWidths = (formattedData, headings, pxPerCharacter, e
 	});
 
 	res.forEach((r, i) => {
-		res[i] = extraColumnWidth + (r * pxPerCharacter);
+		res[i] = Math.min(extraColumnWidth + (r * pxPerCharacter), maxAutoColumnSize);
 	});
 
 	return res;

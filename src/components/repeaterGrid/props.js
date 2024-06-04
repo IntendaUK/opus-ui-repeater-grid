@@ -1,4 +1,14 @@
 const props = {
+    averageColumnSize: {
+        type: 'decimal',
+        desc: 'Defines the average column width, used for estimating the size of the scrollbar',
+        internal: true
+    },
+    maxAutoColumnSize: {
+        type: 'integer',
+        desc: 'When columns are sized automatically (based on content), this is the maximum size that can be set',
+        dft: 400
+    },
     heightCellHeader: {
         type: 'integer',
         desc: 'The height of each header cell',

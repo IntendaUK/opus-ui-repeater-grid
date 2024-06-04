@@ -43,7 +43,12 @@ const data = Array(rows)
 		const record = {};
 
 		for (let i = 0; i < columns; i++) {
-			record[columnNames[i]] = getRandomString(columnLengths[i]);
+			if (i % 10 === 0)
+				record[columnNames[i]] = null;
+			else if (i % 15 === 0)
+				record[columnNames[i]] = undefined;
+			else
+				record[columnNames[i]] = getRandomString(columnLengths[i] * 1000);
 		}
 
 		return record;
@@ -96,12 +101,13 @@ root.render(
 				prps: {
 					data,
 					styleCell: {
-						display: 'flex',
-						alignItems: 'center',
-						padding: '0px 12px',
+						padding: '10px 12px',
 						borderBottom: '2px solid #eee',
 						fontSize: '14px',
-						opacity: 0.5
+						opacity: 0.5,
+						overflow: 'hidden',
+						whiteSpace: 'nowrap',
+						textOverflow: 'ellipsis'
 					},
 					heightCellHeader: 68,
 					heightCell: 40,
