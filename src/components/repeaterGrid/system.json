@@ -1,6 +1,6 @@
 {
     "propSpecConfig": {
-        "path": "src/components/codeEditor/props.js",
+        "path": "src/components/repeaterGrid/props.js",
         "functions": [],
         "dependents": []
     }
