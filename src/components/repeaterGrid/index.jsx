@@ -26,10 +26,12 @@ const onGetData = ({ setState, state: { data, pxPerCharacter, extraColumnWidth }
 
 	const formattedData = data.map(d => Object.values(d));
 	const columnWidths = calculateColumnWidths(formattedData, Object.keys(data[0]), pxPerCharacter, extraColumnWidth);
+	const averageColumnSize = columnWidths.reduce((a, b) => a + b, 0) / columnWidths.length;
 
 	setState({
 		formattedData,
-		columnWidths
+		columnWidths,
+		averageColumnSize
 	});
 };
 
@@ -67,7 +69,7 @@ export const RepeaterGrid = props => {
 	const { id, getHandler, setState, state } = props;
 
 	const { data, formattedData, columnWidths, traitHeaderCell, traitBodyCell } = state;
-	const { heightCellHeader, heightCell, styleCell, styleCellHeader } = state;
+	const { heightCellHeader, heightCell, styleCell, styleCellHeader, averageColumnSize } = state;
 
 	const gridRef = useRef(null);
 	const headerRef = useRef(null);
@@ -119,6 +121,7 @@ export const RepeaterGrid = props => {
 										columnCount={columnWidths.length}
 										columnWidth={getColumnWidth}
 										height={height - heightCellHeader}
+										estimatedColumnSize={averageColumnSize}
 										rowCount={formattedData.length}
 										rowHeight={heightCell}
 										width={width}
