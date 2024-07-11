@@ -12,12 +12,73 @@ import propsRepeaterGrid from './components/repeaterGrid/props';
 //Opus Lib
 import Opus, { loadMdaPackage } from '@intenda/opus-ui';
 import '@intenda/opus-ui-components';
+import './main.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 //Test Data
-const columns = 1000;
-const rows = 10;
+const testDataConfig = {
+	rows: 100,
+	columns: 5,
+	maxColumnCharacters: 60,
+	columnConfig: [
+        {
+            "isAction": true,
+            "key": "config",
+            "name": "Flonfig",
+            "type": "string",
+            "default": "",
+            "columnWidth": 400,
+            "columnMinWidth": "85px",
+            "align": "center",
+            "headerTraits": [
+                {
+                    "trait": "@l2_grid/visual/headerCells/visual/actionHeaderCell/default/index",
+                    "traitPrps": {
+                        "title": "Config"
+                    }
+                }
+            ],
+            "cellTraits": [
+                {
+                    "trait": "@l2_dashboards/l2_data_connectors/visual/dataConnectionConfiguration/visual/container/visual/tabContainer/visual/securityTab/visual/securityGrid/visual/configCell",
+                    "traitPrps": {}
+                }
+            ]
+        },
+        {
+            "enabled": false,
+            "key": "org_cde",
+            "name": "Organization Code",
+            "type": "string",
+            "default": "",
+            "columnWidth": 400,
+            "columnMinWidth": "85px",
+            "align": "left"
+        },
+        {
+            "enabled": false,
+            "key": "grp_des",
+            "name": "Role Code",
+            "type": "string",
+            "default": "",
+            "columnWidth": 400,
+            "columnMinWidth": "85px",
+            "align": "left"
+        },
+        {
+            "triStateFilter": true,
+            "enabled": true,
+            "key": "cre",
+            "name": "Create",
+            "type": "boolean",
+            "default": false,
+            "columnWidth": 100,
+            "columnMinWidth": "85px",
+            "align": "center"
+        }
+    ]
+}
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const getRandomString = length => {
@@ -29,26 +90,38 @@ const getRandomString = length => {
     return result;
 };
 
-const columnLengths = Array(columns)
-	.fill(0)
-	.map(() => 1 + ~~(Math.random() * 9));
+const columnCount = testDataConfig.columnConfig?.length ?? testDataConfig.columns;
 
-const columnNames = Array(columns)
+const columnLengths = Array(columnCount)
 	.fill(0)
-	.map(i => getRandomString(columnLengths[i]));
+	.map(() => 1 + ~~(Math.random() * testDataConfig.maxColumnCharacters));
 
-const data = Array(rows)
+const columnNames = Array(columnCount)
+	.fill(0)
+	.map((_, i) => {
+		const key = testDataConfig.columnConfig?.[i]?.key;
+		if (key)
+			return key;
+
+		return getRandomString(columnLengths[i]);
+	});
+
+const data = Array(testDataConfig.rows)
 	.fill(0)
 	.map(() => {
 		const record = {};
 
-		for (let i = 0; i < columns; i++) {
-			if (i % 10 === 0)
-				record[columnNames[i]] = null;
-			else if (i % 15 === 0)
-				record[columnNames[i]] = undefined;
-			else
-				record[columnNames[i]] = getRandomString(columnLengths[i] * 1000);
+		for (let i = 0; i < columnCount; i++) {
+			const config = testDataConfig.columnConfig?.[i];
+
+			let value;
+
+			if (config?.type === 'string' || config?.type === undefined)
+				value = getRandomString(columnLengths[i]);
+			else if (config?.type === 'boolean')
+				value = Math.random() > 0.5;
+
+			record[columnNames[i]] = value;
 		}
 
 		return record;
@@ -77,12 +150,15 @@ loadMdaPackage({
 				prps: {
 					cpt: '%cpt%',
 					bold: true,
-					fontSize: '1.17em'
+					fontSize: '1.17em',
+					whiteSpace: 'nowrap',
+					textOverflow: 'ellipsis',
+					overflow: 'hidden'
 				}
 			}]
 		}
 	}
-})
+});
 
 root.render(
 	<Opus
@@ -100,6 +176,12 @@ root.render(
 				type: 'repeaterGrid',
 				prps: {
 					data,
+					parentQuerySelector: '#root',
+					extraWidthPerColumn: 24,
+					fontStyleHeader: '700 16.38px Simplon Norm Regular',
+					fontStyleBody: '14px Simplon Norm Regular',
+					autoColumnWidths: true,
+					columnConfig: testDataConfig.columnConfig,
 					styleCell: {
 						padding: '10px 12px',
 						borderBottom: '2px solid #eee',

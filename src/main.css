@@ -1,0 +1,8 @@
+@font-face {
+	font-family: "Simplon Norm Regular";
+	src: url("/fonts/Moderat-Regular.otf") format("opentype");
+}
+
+* {
+	font-family: "Simplon Norm Regular" !important;
+}

@@ -11,7 +11,8 @@ import { Grid, AutoSizer, ScrollSync } from 'react-virtualized';
 
 //Internal
 import { HeaderColumns } from './header';
-import { calculateColumnWidths } from './events';
+import setColumnWidths from './setColumnWidths';
+import buildColumnConfig from './buildColumnConfig';
 
 //Styles
 import './styles.css';
@@ -20,21 +21,30 @@ import './styles.css';
 const RepeaterGridContext = createContext('repeaterGrid');
 
 //Events
-const onGetData = ({ setState, state }) => {
-	const { data } = state;
+const onGetData = props => {
+	const { setState, state: { data } } = props;
 
 	if (!data || data.length === 0)
 		return;
 
-	const formattedData = data.map(d => Object.values(d));
-	const columnWidths = calculateColumnWidths(formattedData, Object.keys(data[0]), state);
+	const newState = {};
+
+	const columnConfig = props.state.columnConfig ?? buildColumnConfig(data);
+
+	const formattedData = data.map(d => columnConfig.map(c => d[c.key]));
+
+	const canvas = document.createElement('canvas');
+	const canvasCtx = canvas.getContext('2d');
+	setColumnWidths(props, columnConfig, data, canvasCtx);
+
+	const columnWidths = columnConfig.map(c => c.columnWidth);
 	const averageColumnSize = columnWidths.reduce((a, b) => a + b, 0) / columnWidths.length;
 
-	setState({
-		formattedData,
-		columnWidths,
-		averageColumnSize
-	});
+	newState.formattedData = formattedData;
+	newState.columnWidths = columnWidths;
+	newState.averageColumnSize = averageColumnSize;
+
+	setState(newState);
 };
 
 //Components
@@ -66,11 +76,46 @@ const cellRendererHtml = (formattedData, styleCell, { columnIndex, key, rowIndex
 	</div>
 );
 
+const getCells = ({ state: { formattedData, traitBodyCell, columnConfig, styleCell } }, args) => {
+	const config = columnConfig?.[args.columnIndex];
+	const traits = config?.cellTraits;
+
+	if (traits === undefined || traits?.length === 0) {
+		if (traitBodyCell)
+			return cellRendererOpus(formattedData, traitBodyCell, args);
+
+		return cellRendererHtml(formattedData, styleCell, args);
+	}
+
+	return (
+		<div
+			key={args.key}
+			style={args.style}
+		>
+			<Component key={args.key + 'inner'} mda={{
+				id: args.key + 'inner',
+				traits: traits.map(t => {
+					const res = { ...t };
+					res.traitPrps.columnConfig = { ...config };
+					res.traitPrps = { ...t.traitPrps };
+					delete res.traitPrps.columnConfig.headerTraits;
+					delete res.traitPrps.columnConfig.cellTraits;
+
+					res.traitPrps.columnCellIndex = args.rowIndex;
+					res.traitPrps.cellId = args.key;
+
+					return res;
+				})
+			}} />
+		</div>
+	);
+};
+
 //Export
 export const RepeaterGrid = props => {
 	const { id, getHandler, setState, state } = props;
 
-	const { data, formattedData, columnWidths, traitHeaderCell, traitBodyCell } = state;
+	const { data, formattedData, columnWidths, traitHeaderCell, traitBodyCell, columnConfig } = state;
 	const { heightCellHeader, heightCell, styleCell, styleCellHeader, averageColumnSize } = state;
 
 	const gridRef = useRef(null);
@@ -92,14 +137,9 @@ export const RepeaterGrid = props => {
 	const headerColumns = useMemo(() => {
 		return <HeaderColumns onResize={onResize} />;
 	/* eslint-disable-next-line react-hooks/exhaustive-deps */
-	}, [heightCellHeader, styleCellHeader, traitHeaderCell, columnWidths]);
+	}, [heightCellHeader, styleCellHeader, traitHeaderCell, columnWidths, columnConfig]);
 
-	const memoizedCellRenderer = useCallback(args => {
-		if (traitBodyCell)
-			return cellRendererOpus(formattedData, traitBodyCell, args);
-
-		return cellRendererHtml(formattedData, styleCell, args);
-	}, [traitBodyCell, formattedData, styleCell]);
+	const memoizedCellRenderer = useCallback(getHandler(getCells), [traitBodyCell, formattedData, styleCell]);
 
 	const getColumnWidth = useCallback(({ index }) => columnWidths[index], [columnWidths]);
 

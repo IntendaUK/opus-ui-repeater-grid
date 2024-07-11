@@ -7,7 +7,7 @@ const props = {
     maxAutoColumnSize: {
         type: 'integer',
         desc: 'When columns are sized automatically (based on content), this is the maximum size that can be set',
-        dft: 400
+        dft: 800
     },
     heightCellHeader: {
         type: 'integer',
@@ -31,14 +31,19 @@ const props = {
         type: 'object',
         desc: 'An object defining extra style attributes to be applied to each header cell div'
     },
-    pxPerCharacter: {
-        type: 'integer',
-        desc: 'Used to determine how wide each cell should be based on the longest string in each column',
-        dft: 10
+    growToFillHorizontal: {
+        type: 'boolean',
+        desc: 'When set to true, columns that do not have static or max width will grow until all horizontal space is used',
+        dft: true
     },
-    extraColumnWidth: {
+    extraWidthPerColumn: {
         type: 'string',
-        desc: 'Additional width to be added to columns',
+        desc: 'Extra width to add to each column to account for padding',
+        dft: 0
+    },
+    extraWidthForSorting: {
+        type: 'string',
+        desc: 'Extra width to add to each column if the column can be sorted to account for a sort icon',
         dft: 0
     },
     formattedData: {
@@ -58,6 +63,28 @@ const props = {
     styleCell: {
         type: 'object',
         desc: 'An object defining extra style attributes to be applied to each body cell div'
+    },
+    fontStyleHeader: {
+        type: 'string',
+        desc: '',
+        dft: '700 16px serif'
+    },
+    fontStyleBody: {
+        type: 'string',
+        desc: '',
+        dft: '14px serif'
+    },
+    parentQuerySelector: {
+        type: 'string',
+        desc: ''
+    },
+    columnConfig: {
+        type: 'array',
+        desc: '',
+        spec: [{
+            name: 'Column name to be used for the header when traitHeaderCell is not defined',
+            
+        }]
     }
 };
 
