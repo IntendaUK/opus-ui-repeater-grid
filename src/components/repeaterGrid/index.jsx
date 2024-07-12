@@ -29,7 +29,12 @@ const onGetData = props => {
 
 	const newState = {};
 
-	const columnConfig = props.state.columnConfig ?? buildColumnConfig(data);
+	let columnConfig = props.state.columnConfig;
+	if (!columnConfig) {
+		columnConfig = buildColumnConfig(data);
+
+		newState.columnConfig = columnConfig;
+	}
 
 	const formattedData = data.map(d => columnConfig.map(c => d[c.key]));
 

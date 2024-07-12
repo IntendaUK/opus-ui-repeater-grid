@@ -11,8 +11,6 @@ import propsRepeaterGrid from './components/repeaterGrid/props';
 
 //Opus Lib
 import Opus, { loadMdaPackage } from '@intenda/opus-ui';
-import '@intenda/opus-ui-components';
-import './main.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -20,64 +18,7 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 const testDataConfig = {
 	rows: 100,
 	columns: 5,
-	maxColumnCharacters: 60,
-	columnConfig: [
-        {
-            "isAction": true,
-            "key": "config",
-            "name": "Flonfig",
-            "type": "string",
-            "default": "",
-            "columnWidth": 400,
-            "columnMinWidth": "85px",
-            "align": "center",
-            "headerTraits": [
-                {
-                    "trait": "@l2_grid/visual/headerCells/visual/actionHeaderCell/default/index",
-                    "traitPrps": {
-                        "title": "Config"
-                    }
-                }
-            ],
-            "cellTraits": [
-                {
-                    "trait": "@l2_dashboards/l2_data_connectors/visual/dataConnectionConfiguration/visual/container/visual/tabContainer/visual/securityTab/visual/securityGrid/visual/configCell",
-                    "traitPrps": {}
-                }
-            ]
-        },
-        {
-            "enabled": false,
-            "key": "org_cde",
-            "name": "Organization Code",
-            "type": "string",
-            "default": "",
-            "columnWidth": 400,
-            "columnMinWidth": "85px",
-            "align": "left"
-        },
-        {
-            "enabled": false,
-            "key": "grp_des",
-            "name": "Role Code",
-            "type": "string",
-            "default": "",
-            "columnWidth": 400,
-            "columnMinWidth": "85px",
-            "align": "left"
-        },
-        {
-            "triStateFilter": true,
-            "enabled": true,
-            "key": "cre",
-            "name": "Create",
-            "type": "boolean",
-            "default": false,
-            "columnWidth": 100,
-            "columnMinWidth": "85px",
-            "align": "center"
-        }
-    ]
+	maxColumnCharacters: 60
 }
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -178,8 +119,8 @@ root.render(
 					data,
 					parentQuerySelector: '#root',
 					extraWidthPerColumn: 24,
-					fontStyleHeader: '700 16.38px Simplon Norm Regular',
-					fontStyleBody: '14px Simplon Norm Regular',
+					fontStyleHeader: '700 16px serif',
+					fontStyleBody: '14px serif',
 					autoColumnWidths: true,
 					columnConfig: testDataConfig.columnConfig,
 					styleCell: {
