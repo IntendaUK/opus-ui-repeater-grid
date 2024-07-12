@@ -83,8 +83,8 @@ const setColumnWidths = (props, columnConfig, data, canvasCtx) => {
 		setColumnWidth(props, c, useWidth);
 	});
 
-	//if (growToFillHorizontal)
-	//	growColumns(props, columnConfig);
+	if (growToFillHorizontal)
+		growColumns(props, columnConfig);
 };
 
 export default setColumnWidths;
