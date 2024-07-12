@@ -1,6 +1,6 @@
 {
 	"name": "@intenda/opus-ui-repeater-grid",
-	"version": "0.3.5",
+	"version": "0.4.0",
 	"type": "module",
 	"homepage": "https://opus-ui.com",
 	"files": [
@@ -33,7 +33,6 @@
 		"react-virtualized": "^9.22.5"
 	},
 	"devDependencies": {
-		"@intenda/opus-ui-components": "^1.0.2",
 		"@types/react": "^18.2.55",
 		"@types/react-dom": "^18.2.19",
 		"@vitejs/plugin-react": "^4.2.1",

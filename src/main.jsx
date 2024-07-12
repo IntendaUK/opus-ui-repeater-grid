@@ -11,13 +11,15 @@ import propsRepeaterGrid from './components/repeaterGrid/props';
 
 //Opus Lib
 import Opus, { loadMdaPackage } from '@intenda/opus-ui';
-import '@intenda/opus-ui-components';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 //Test Data
-const columns = 1000;
-const rows = 10;
+const testDataConfig = {
+	rows: 100,
+	columns: 5,
+	maxColumnCharacters: 60
+}
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 const getRandomString = length => {
@@ -29,26 +31,38 @@ const getRandomString = length => {
     return result;
 };
 
-const columnLengths = Array(columns)
-	.fill(0)
-	.map(() => 1 + ~~(Math.random() * 9));
+const columnCount = testDataConfig.columnConfig?.length ?? testDataConfig.columns;
 
-const columnNames = Array(columns)
+const columnLengths = Array(columnCount)
 	.fill(0)
-	.map(i => getRandomString(columnLengths[i]));
+	.map(() => 1 + ~~(Math.random() * testDataConfig.maxColumnCharacters));
 
-const data = Array(rows)
+const columnNames = Array(columnCount)
+	.fill(0)
+	.map((_, i) => {
+		const key = testDataConfig.columnConfig?.[i]?.key;
+		if (key)
+			return key;
+
+		return getRandomString(columnLengths[i]);
+	});
+
+const data = Array(testDataConfig.rows)
 	.fill(0)
 	.map(() => {
 		const record = {};
 
-		for (let i = 0; i < columns; i++) {
-			if (i % 10 === 0)
-				record[columnNames[i]] = null;
-			else if (i % 15 === 0)
-				record[columnNames[i]] = undefined;
-			else
-				record[columnNames[i]] = getRandomString(columnLengths[i] * 1000);
+		for (let i = 0; i < columnCount; i++) {
+			const config = testDataConfig.columnConfig?.[i];
+
+			let value;
+
+			if (config?.type === 'string' || config?.type === undefined)
+				value = getRandomString(columnLengths[i]);
+			else if (config?.type === 'boolean')
+				value = Math.random() > 0.5;
+
+			record[columnNames[i]] = value;
 		}
 
 		return record;
@@ -77,12 +91,15 @@ loadMdaPackage({
 				prps: {
 					cpt: '%cpt%',
 					bold: true,
-					fontSize: '1.17em'
+					fontSize: '1.17em',
+					whiteSpace: 'nowrap',
+					textOverflow: 'ellipsis',
+					overflow: 'hidden'
 				}
 			}]
 		}
 	}
-})
+});
 
 root.render(
 	<Opus
@@ -100,6 +117,12 @@ root.render(
 				type: 'repeaterGrid',
 				prps: {
 					data,
+					parentQuerySelector: '#root',
+					extraWidthPerColumn: 24,
+					fontStyleHeader: '700 16px serif',
+					fontStyleBody: '14px serif',
+					autoColumnWidths: true,
+					columnConfig: testDataConfig.columnConfig,
 					styleCell: {
 						padding: '10px 12px',
 						borderBottom: '2px solid #eee',
