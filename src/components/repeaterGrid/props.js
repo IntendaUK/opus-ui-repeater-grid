@@ -66,24 +66,23 @@ const props = {
     },
     fontStyleHeader: {
         type: 'string',
-        desc: '',
+        desc: 'The font style for headers. This is needed to calculate column widths',
         dft: '700 16px serif'
     },
     fontStyleBody: {
         type: 'string',
-        desc: '',
+        desc: 'The font style for text in cells. This is needed to calculate column widths',
         dft: '14px serif'
-    },
-    parentQuerySelector: {
-        type: 'string',
-        desc: ''
     },
     columnConfig: {
         type: 'array',
-        desc: '',
+        desc: 'Column config',
         spec: [{
             name: 'Column name to be used for the header when traitHeaderCell is not defined',
-            
+            key: 'Data key to access for each cell',
+            columnWidth: 'Auto-calculated when not specified',
+            columnMinWidth: 'Defaults to 50 when not set',
+            columnMaxWidth: 'Defaults to state.maxAutoColumnSize when not set'
         }]
     }
 };

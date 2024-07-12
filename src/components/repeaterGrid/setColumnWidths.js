@@ -2,10 +2,10 @@ const calculateStringWidth = (str, canvasCtx) => {
 	return canvasCtx.measureText(str).width;
 }
 
-const growColumns = ({ parentId, state: { parentQuerySelector } }, columnConfig) => {
-	const el = parentQuerySelector ?
-		document.querySelector(parentQuerySelector) :
-		document.getElementById(parentId);
+const growColumns = (props, columnConfig) => {
+	const { state: { parentId } } = props;
+
+	const el = document.getElementById(parentId);
 
 	const totalWidth = el.clientWidth;
 
