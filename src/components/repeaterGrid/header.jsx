@@ -15,7 +15,7 @@ const RepeaterGridContext = createContext('repeaterGrid');
 
 //Components
 const HeaderColumnsCustom = ({ onResize }) => {
-	const { state: { heightCellHeader, columnWidths, data, traitHeaderCell, styleCellHeader, columnConfig } } = useContext(RepeaterGridContext);
+	const { state: { parentId, heightCellHeader, columnWidths, data, traitHeaderCell, styleCellHeader, columnConfig } } = useContext(RepeaterGridContext);
 
 	return columnWidths.map((width, index) => (
 		<ResizableBox
@@ -29,6 +29,7 @@ const HeaderColumnsCustom = ({ onResize }) => {
 			style={styleCellHeader}
 		>
 			<ThemedComponent mda={{
+				parentId,
 				traits: [{
 					trait: traitHeaderCell,
 					traitPrps: {
@@ -41,16 +42,15 @@ const HeaderColumnsCustom = ({ onResize }) => {
 };
 
 export const HeaderColumns = ({ onResize }) => {
-	const { state: { columnWidths, data, heightCellHeader, styleCellHeader, traitHeaderCell, columnConfig } } = useContext(RepeaterGridContext);
+	const { state: { parentId, columnWidths, heightCellHeader, styleCellHeader, traitHeaderCell, columnConfig } } = useContext(RepeaterGridContext);
 
 	const res = useMemo(() => {
 		if (traitHeaderCell)
 			return <HeaderColumnsCustom onResize={onResize} />;
 
-		return columnWidths.map((width, index) => {
+		return columnConfig.map((config, index) => {
 			let inner = null;
 
-			const config = columnConfig?.[index];
 			const traits = config?.headerTraits;
 
 			if (traits === undefined || traits.length === 0) {
@@ -62,6 +62,7 @@ export const HeaderColumns = ({ onResize }) => {
 			} else {
 				inner = (
 					<ThemedComponent mda={{
+						parentId,
 						traits: traits.map((t, i) => {
 							const res = { ...t };
 							res.traitPrps.columnIndex = i;
@@ -77,7 +78,7 @@ export const HeaderColumns = ({ onResize }) => {
 			
 			return (
 				<ResizableBox
-					key={Object.keys(data[0])[index]}
+					key={columnConfig[index].name}
 					width={columnWidths[index]}
 					height={heightCellHeader}
 					axis='x'

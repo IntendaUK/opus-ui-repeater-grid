@@ -53,12 +53,13 @@ const onGetData = props => {
 };
 
 //Components
-const cellRendererOpus = (formattedData, traitBodyCell, { columnIndex, key, rowIndex, style }) => (
+const cellRendererOpus = (formattedData, traitBodyCell, { columnIndex, key, rowIndex, style }, parentId) => (
 	<div
 		key={key}
 		style={style}
 	>
 		<Component mda={{
+			parentId,
 			traits: [{
 				trait: traitBodyCell,
 				traitPrps: {
@@ -81,16 +82,18 @@ const cellRendererHtml = (formattedData, styleCell, { columnIndex, key, rowIndex
 	</div>
 );
 
-const getCells = ({ state: { formattedData, traitBodyCell, columnConfig, styleCell } }, args) => {
+const getCells = ({ state: { parentId, formattedData, traitBodyCell, columnConfig, styleCell } }, args) => {
 	const config = columnConfig?.[args.columnIndex];
 	const traits = config?.cellTraits;
 
 	if (traits === undefined || traits?.length === 0) {
 		if (traitBodyCell)
-			return cellRendererOpus(formattedData, traitBodyCell, args);
+			return cellRendererOpus(formattedData, traitBodyCell, args, parentId);
 
 		return cellRendererHtml(formattedData, styleCell, args);
 	}
+
+	const { rowIndex, columnIndex } = args;
 
 	return (
 		<div
@@ -99,6 +102,7 @@ const getCells = ({ state: { formattedData, traitBodyCell, columnConfig, styleCe
 		>
 			<Component key={args.key + 'inner'} mda={{
 				id: args.key + 'inner',
+				parentId,
 				traits: traits.map(t => {
 					const res = { ...t };
 					res.traitPrps.columnConfig = { ...config };
@@ -106,7 +110,8 @@ const getCells = ({ state: { formattedData, traitBodyCell, columnConfig, styleCe
 					delete res.traitPrps.columnConfig.headerTraits;
 					delete res.traitPrps.columnConfig.cellTraits;
 
-					res.traitPrps.columnCellIndex = args.rowIndex;
+					res.traitPrps.columnCellIndex = rowIndex;
+					res.traitPrps.columnCellValue = formattedData[rowIndex][columnIndex];
 					res.traitPrps.cellId = args.key;
 
 					return res;
