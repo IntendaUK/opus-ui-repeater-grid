@@ -24,12 +24,19 @@ const RepeaterGridContext = createContext('repeaterGrid');
 const onGetData = props => {
 	const { setState, state: { data } } = props;
 
-	if (!data || data.length === 0)
+	let columnConfig = props.state.columnConfig;
+
+	if (
+		!data ||
+		(
+			data.length === 0 &&
+			!columnConfig
+		)
+	)
 		return;
 
 	const newState = {};
 
-	let columnConfig = props.state.columnConfig;
 	if (!columnConfig) {
 		columnConfig = buildColumnConfig(data);
 
@@ -40,14 +47,23 @@ const onGetData = props => {
 
 	const canvas = document.createElement('canvas');
 	const canvasCtx = canvas.getContext('2d');
-	setColumnWidths(props, columnConfig, data, canvasCtx);
 
-	const columnWidths = columnConfig.map(c => c.columnWidth);
-	const averageColumnSize = columnWidths.reduce((a, b) => a + b, 0) / columnWidths.length;
+	let columnWidths;
+	if (data.length > 0) {
+		setColumnWidths(props, columnConfig, data, canvasCtx);
+		columnWidths = columnConfig.map(c => c.columnWidth);
+	} else if (columnConfig.some(c => c.columnWidth === undefined))
+		columnWidths = columnConfig.map(() => 50);
+
+	if (columnWidths !== undefined) {
+		const averageColumnSize = columnWidths.reduce((a, b) => a + b, 0) / columnWidths.length;
+
+		newState.columnWidths = columnWidths;
+		newState.averageColumnSize = averageColumnSize;
+	}
+
 
 	newState.formattedData = formattedData;
-	newState.columnWidths = columnWidths;
-	newState.averageColumnSize = averageColumnSize;
 
 	setState(newState);
 };
