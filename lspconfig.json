@@ -2,7 +2,7 @@
 	"components": [
 		{
 			"name": "repeaterGrid",
-			"path": "src/components/repeaterGrid"
+			"path": "dist/components/repeaterGrid"
 		}
 	]
 }
