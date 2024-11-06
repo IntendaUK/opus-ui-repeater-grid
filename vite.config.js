@@ -9,6 +9,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import glob from 'glob';
 
+import { pathToFileURL } from 'url';
+
 import fixReactVirtualized from 'esbuild-plugin-react-virtualized'
 
 const customCopyPlugin = () => {
@@ -39,28 +41,74 @@ const customCopyPlugin = () => {
 	};
 }
 
-export default defineConfig(() => ({
-	plugins: [
-		libCss(),
-		customCopyPlugin(),
-		react(),
-	],
-	build: {
-		lib: {
-			entry: resolve('src', 'library.js'),
-			name: '@intenda/opus-ui-repeater-grid',
-			formats: ['es'],
-			fileName: () => `lib.js`,
-		},
-		rollupOptions: {
-			external: [...Object.keys(packageJson.peerDependencies)],
-		},
-	},
-	optimizeDeps: {
-		esbuildOptions: {
-			plugins: [
-				fixReactVirtualized
-			]
+async function fileExists(path) {
+	try {
+		await fs.access(path);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+export default defineConfig(async () => {
+	let monorepoAliases = {};
+	let monorepoWatchPaths = [];
+
+	const monorepoConfigPath = path.resolve(__dirname, './vite.monorepo.config.js');
+
+	if (await fileExists(monorepoConfigPath)) {
+		try {
+			const monorepoConfigUrl = pathToFileURL(monorepoConfigPath).href;
+			const monoRepoConfig = await import(monorepoConfigUrl);
+			const monorepoAliasNames = monoRepoConfig.default;
+
+			monorepoAliasNames.forEach((aliasName) => {
+				const aliasPath = path.resolve(__dirname, `../${aliasName}`);
+				monorepoAliases[aliasName] = aliasPath;
+			});
+
+			monorepoWatchPaths = Object.values(monorepoAliases).map(
+				(aliasPath) => `!${aliasPath}/**`
+			);
+		} catch (e) {
+			console.error('Error loading monorepo config:', e);
 		}
 	}
-}));
+
+	return {
+		plugins: [
+			libCss(),
+			customCopyPlugin(),
+			react(),
+		],
+		build: {
+			lib: {
+				entry: resolve('src', 'library.js'),
+				name: '@intenda/opus-ui-repeater-grid',
+				formats: ['es'],
+				fileName: () => `lib.js`,
+			},
+			rollupOptions: {
+				external: [...Object.keys(packageJson.peerDependencies)],
+			},
+		},
+		optimizeDeps: {
+			esbuildOptions: {
+				loader: {
+					'.js': 'jsx',
+				},
+				plugins: [
+					fixReactVirtualized
+				]
+			}
+		},
+		resolve: {
+			alias: monorepoAliases
+		},
+		server: {
+			watch: {
+				ignored: monorepoWatchPaths
+			}
+		}
+	};
+});
