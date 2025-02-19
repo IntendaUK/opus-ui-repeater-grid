@@ -98,7 +98,7 @@ const cellRendererHtml = (formattedData, styleCell, { columnIndex, key, rowIndex
 	</div>
 );
 
-const getCells = ({ state: { parentId, formattedData, traitBodyCell, columnConfig, styleCell } }, args) => {
+const getCells = ({ state: { id, parentId, formattedData, traitBodyCell, columnConfig, styleCell } }, args) => {
 	const config = columnConfig?.[args.columnIndex];
 	const traits = config?.cellTraits;
 
@@ -111,13 +111,16 @@ const getCells = ({ state: { parentId, formattedData, traitBodyCell, columnConfi
 
 	const { rowIndex, columnIndex } = args;
 
+	const keyOuter = `${id}-${args.key}`;
+	const keyInner = `${keyOuter}-inner`;
+
 	return (
 		<div
-			key={args.key}
+			key={keyOuter}
 			style={args.style}
 		>
-			<Component key={args.key + 'inner'} mda={{
-				id: args.key + 'inner',
+			<Component key={keyInner} mda={{
+				id: keyInner,
 				parentId,
 				traits: traits.map(t => {
 					const res = { ...t };
