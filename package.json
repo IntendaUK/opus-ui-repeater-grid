@@ -1,6 +1,6 @@
 {
 	"name": "@intenda/opus-ui-repeater-grid",
-	"version": "0.4.6",
+	"version": "2.0.0",
 	"type": "module",
 	"homepage": "https://opus-ui.com",
 	"files": [
@@ -30,24 +30,24 @@
 	},
 	"dependencies": {
 		"react-resizable": "^3.0.5",
-		"react-virtualized": "^9.22.5"
+		"react-virtualized": "^9.22.6"
 	},
 	"devDependencies": {
-		"@types/react": "^18.2.55",
-		"@types/react-dom": "^18.2.19",
-		"@vitejs/plugin-react": "^4.2.1",
+		"@types/react": "^19.0.10",
+		"@types/react-dom": "^19.0.4",
+		"@vitejs/plugin-react": "^4.3.4",
 		"esbuild-plugin-react-virtualized": "^1.0.4",
-		"eslint": "^8.56.0",
-		"eslint-plugin-react": "^7.33.2",
-		"eslint-plugin-react-hooks": "^4.6.0",
-		"eslint-plugin-react-refresh": "^0.4.5",
-		"vite": "^5.1.0",
+		"eslint": "^9.20.1",
+		"eslint-plugin-react": "^7.37.4",
+		"eslint-plugin-react-hooks": "^5.1.0",
+		"eslint-plugin-react-refresh": "^0.4.19",
+		"vite": "^6.1.0",
 		"vite-plugin-libcss": "^1.1.1"
 	},
 	"peerDependencies": {
-		"@intenda/opus-ui": ">=1.0.0 < 2.0.0",
-		"react": ">=18.0.0 < 19.0.0",
-		"react-dom": ">=18.0.0 < 19.0.0"
+		"@intenda/opus-ui": ">=2.0.0 < 3.0.0",
+		"react": ">=19.0.0 < 20.0.0",
+		"react-dom": ">=19.0.0 < 20.0.0"
 	},
 	"publishConfig": {
 		"access": "public"
