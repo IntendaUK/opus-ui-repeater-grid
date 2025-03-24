@@ -1,3 +1,5 @@
+/* eslint-disable max-lines-per-function */
+
 import { resolve } from 'node:path';
 
 import react from '@vitejs/plugin-react';
@@ -76,6 +78,8 @@ async function fileExists (path) {
 	}
 }
 
+const ReactCompilerConfig = { target: '19' };
+
 export default defineConfig(async () => {
 	let monorepoAliases = {};
 	let monorepoWatchPaths = [];
@@ -105,7 +109,14 @@ export default defineConfig(async () => {
 		plugins: [
 			libCss(),
 			customCopyPlugin(),
-			react()
+			react({
+				babel: {
+					compact: true,
+					plugins: [
+						['babel-plugin-react-compiler', ReactCompilerConfig]
+					]
+				}
+			})
 		],
 		build: {
 			lib: {
