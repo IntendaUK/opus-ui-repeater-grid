@@ -4,11 +4,8 @@ import { useContext, useMemo } from 'react';
 //Opus UI
 import { ThemedComponent, createContext } from '@intenda/opus-ui';
 
-//Plugins
-import { ResizableBox } from 'react-resizable';
-
-//Styles
-import 'react-resizable/css/styles.css';
+//Components
+import ResizableBox from './resizableBox';
 
 //Context
 const RepeaterGridContext = createContext('repeaterGrid');

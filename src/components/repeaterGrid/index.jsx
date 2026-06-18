@@ -7,7 +7,7 @@ import { useRef, useEffect, useCallback, useMemo } from 'react';
 import { createContext, Component } from '@intenda/opus-ui';
 
 //Plugins
-import { Grid, AutoSizer, ScrollSync } from 'react-virtualized';
+import { Grid, AutoSizer, ScrollSync } from 'react-virtualized/dist/es';
 
 //Internal
 import { HeaderColumns } from './header';
