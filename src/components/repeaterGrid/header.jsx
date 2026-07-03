@@ -2,7 +2,7 @@
 import { useContext, useMemo } from 'react';
 
 //Opus UI
-import { ThemedComponent, createContext } from '@intenda/opus-ui';
+import { createContext, renderWgts } from '@intenda/opus-ui';
 
 //Components
 import ResizableBox from './resizableBox';
@@ -25,7 +25,7 @@ const HeaderColumnsCustom = ({ onResize }) => {
 			minConstraints={[30, 30]}
 			style={styleCellHeader}
 		>
-			<ThemedComponent mda={{
+			{renderWgts({
 				parentId,
 				traits: [{
 					trait: traitHeaderCell,
@@ -33,7 +33,7 @@ const HeaderColumnsCustom = ({ onResize }) => {
 						cpt: columnConfig[index].name
 					}
 				}]
-			}} />
+			})}
 		</ResizableBox>
 	));
 };
@@ -58,7 +58,7 @@ export const HeaderColumns = ({ onResize }) => {
 				);
 			} else {
 				inner = (
-					<ThemedComponent mda={{
+					renderWgts({
 						parentId,
 						traits: traits.map((t, i) => {
 							const res = { ...t };
@@ -69,7 +69,7 @@ export const HeaderColumns = ({ onResize }) => {
 
 							return res;
 						})
-					}} />
+					})
 				)
 			}
 			

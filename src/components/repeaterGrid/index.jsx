@@ -4,7 +4,7 @@
 import { useRef, useEffect, useCallback, useMemo } from 'react';
 
 //Opus UI
-import { createContext, Component } from '@intenda/opus-ui';
+import { createContext, renderWgts } from '@intenda/opus-ui';
 
 //Plugins
 import { Grid, AutoSizer, ScrollSync } from 'react-virtualized/dist/es';
@@ -74,7 +74,7 @@ const cellRendererOpus = (formattedData, traitBodyCell, { columnIndex, key, rowI
 		key={key}
 		style={style}
 	>
-		<Component mda={{
+		{renderWgts({
 			parentId,
 			traits: [{
 				trait: traitBodyCell,
@@ -82,7 +82,7 @@ const cellRendererOpus = (formattedData, traitBodyCell, { columnIndex, key, rowI
 					value: formattedData[rowIndex][columnIndex]
 				}
 			}]
-		}} />
+		})}
 	</div>
 );
 
@@ -119,7 +119,7 @@ const getCells = ({ state: { id, parentId, formattedData, traitBodyCell, columnC
 			key={keyOuter}
 			style={args.style}
 		>
-			<Component key={keyInner} mda={{
+			{renderWgts({
 				id: keyInner,
 				parentId,
 				traits: traits.map(t => {
@@ -135,7 +135,7 @@ const getCells = ({ state: { id, parentId, formattedData, traitBodyCell, columnC
 
 					return res;
 				})
-			}} />
+			})}
 		</div>
 	);
 };
