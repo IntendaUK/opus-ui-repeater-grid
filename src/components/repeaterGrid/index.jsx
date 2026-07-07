@@ -175,9 +175,11 @@ export const RepeaterGrid = props => {
 	if (!formattedData)
 		return null;
 
+	//flex:1/minHeight:0 lets the grid fill a flex-column parent. The CSS height:100% alone does
+	// not resolve when the parent's height is itself flex-derived (Firefox), leaving the grid 0-tall.
 	return (
 		<RepeaterGridContext.Provider value={props}>
-			<div id={id} className='cpnRepeaterGrid'>
+			<div id={id} className='cpnRepeaterGrid' style={{ flex: '1 1 0', minHeight: 0 }}>
 				<ScrollSync>
 					{({ onScroll, scrollLeft }) => (
 						<AutoSizer>
