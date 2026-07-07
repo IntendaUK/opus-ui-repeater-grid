@@ -7,6 +7,11 @@ const growColumns = (props, columnConfig) => {
 
 	const el = document.getElementById(parentId);
 
+	//Bail out if the container is missing or not yet laid out (0 width). Growing against a 0
+	// total would corrupt the column widths; the widths recompute on the next data pass.
+	if (!el || !el.clientWidth)
+		return;
+
 	const totalWidth = el.clientWidth;
 
 	let availableWidth = totalWidth;
