@@ -1,13 +1,13 @@
 /* eslint-disable react/prop-types */
 
 //React
-import { useRef, useEffect, useCallback, useMemo } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 
 //Opus UI
 import { createContext, Component } from '@intenda/opus-ui';
 
 //Plugins
-import { Grid, AutoSizer, ScrollSync } from 'react-virtualized';
+import { Grid, ScrollSync } from 'react-virtualized';
 
 //Internal
 import { HeaderColumns } from './header';
@@ -149,6 +149,42 @@ export const RepeaterGrid = props => {
 
 	const gridRef = useRef(null);
 	const headerRef = useRef(null);
+	const resizeObserverRef = useRef(null);
+
+	const [size, setSize] = useState({ width: 0, height: 0 });
+
+	//Measure the grid container ourselves via ResizeObserver instead of react-virtualized's
+	// <AutoSizer>. AutoSizer takes a one-shot offset measurement on mount and then relies on a
+	// legacy scroll/<object> resize detector, which does not fire reliably in Firefox when the
+	// container transitions from hidden/0-size to visible (e.g. the Data Preview panel opening) —
+	// leaving the grid blank until a manual resize. ResizeObserver reports the correct size as
+	// soon as the element is laid out and on every subsequent change, in every supported browser.
+	const setContainerRef = useCallback(el => {
+		if (resizeObserverRef.current) {
+			resizeObserverRef.current.disconnect();
+			resizeObserverRef.current = null;
+		}
+
+		if (!el || typeof ResizeObserver === 'undefined')
+			return;
+
+		const measure = () => {
+			const nextWidth = el.offsetWidth;
+			const nextHeight = el.offsetHeight;
+
+			setSize(prev => (
+				prev.width === nextWidth && prev.height === nextHeight
+					? prev
+					: { width: nextWidth, height: nextHeight }
+			));
+		};
+
+		measure();
+
+		const observer = new ResizeObserver(measure);
+		observer.observe(el);
+		resizeObserverRef.current = observer;
+	}, []);
 
 	/* eslint-disable-next-line react-hooks/exhaustive-deps */
 	useEffect(getHandler(onGetData), [data]);
@@ -175,13 +211,18 @@ export const RepeaterGrid = props => {
 	if (!formattedData)
 		return null;
 
+	const { width, height } = size;
+
 	return (
 		<RepeaterGridContext.Provider value={props}>
-			<div id={id} className='cpnRepeaterGrid'>
+			<div id={id} className='cpnRepeaterGrid' ref={setContainerRef}>
 				<ScrollSync>
-					{({ onScroll, scrollLeft }) => (
-						<AutoSizer>
-							{({ width, height }) => (
+					{({ onScroll, scrollLeft }) => {
+						if (!width || !height)
+							return null;
+
+						return (
+							<div style={{ overflow: 'visible', height: 0, width: 0 }}>
 								<div style={{ width }}>
 									<div ref={headerRef} style={{ width }}>
 										{headerColumns}
@@ -203,9 +244,9 @@ export const RepeaterGrid = props => {
 										scrollLeft={scrollLeft}
 									/>
 								</div>
-							)}
-						</AutoSizer>
-					)}
+							</div>
+						);
+					}}
 				</ScrollSync>
 			</div>
 		</RepeaterGridContext.Provider>
